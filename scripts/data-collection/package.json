@@ -1,0 +1,31 @@
+{
+  "name": "xe247-data-collection",
+  "version": "2.0.0",
+  "description": "FREE data collection scripts for XE 247 marketplace",
+  "main": "collect-all-free.js",
+  "scripts": {
+    "start": "node collect-all-free.js",
+    "collect": "node collect-all-free.js",
+    "collect:free": "node collect-all-free.js",
+    "collect:osm": "node collect-osm-free.js",
+    "collect:foursquare": "node collect-foursquare-free.js",
+    "collect:ev": "node collect-ev-stations.js",
+    "collect:google": "node collect-providers.js",
+    "export:supabase": "node export-to-supabase.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "xe247",
+    "data-collection",
+    "openstreetmap",
+    "foursquare",
+    "ev-charging",
+    "free-api"
+  ],
+  "author": "XE247 Team",
+  "license": "PRIVATE"
+}

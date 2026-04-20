@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "XE 247",
+    "slug": "xe247",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "xe247",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "vn.xe247.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "XE 247 cần truy cập vị trí để tìm tiệm sửa xe gần bạn",
+        "NSLocationAlwaysUsageDescription": "XE 247 cần truy cập vị trí để tìm tiệm sửa xe gần bạn",
+        "NSCameraUsageDescription": "XE 247 cần camera để chụp ảnh đánh giá",
+        "NSPhotoLibraryUsageDescription": "XE 247 cần truy cập thư viện ảnh để upload ảnh"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "vn.xe247.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-location",
+      "expo-image-picker",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "backgroundColor": "#1a1a2e",
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
