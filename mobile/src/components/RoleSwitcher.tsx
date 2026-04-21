@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   label: {
-    fontSize: FontSize.sm,
+    fontSize: FontSize.small,
   },
   mode: {
-    fontSize: FontSize.sm,
+    fontSize: FontSize.small,
     fontWeight: '600',
   },
 });

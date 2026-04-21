@@ -7,7 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Colors, Spacing, BorderRadius, FontSize } from '@/constants/theme';
+import { Spacing, BorderRadius, FontSize, FontWeight } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface ButtonProps {
@@ -36,12 +36,12 @@ export function Button({
   const { colors } = useColorScheme();
 
   const getBackgroundColor = () => {
-    if (disabled) return colors.border;
+    if (disabled) return colors.surfaceSecondary;
     switch (variant) {
       case 'primary':
         return colors.primary;
       case 'secondary':
-        return colors.secondary;
+        return colors.text;
       case 'outline':
       case 'ghost':
         return 'transparent';
@@ -55,34 +55,35 @@ export function Button({
     switch (variant) {
       case 'primary':
       case 'secondary':
-        return '#FFFFFF';
+        return '#ffffff';
       case 'outline':
+        return colors.text;
       case 'ghost':
         return colors.primary;
       default:
-        return '#FFFFFF';
+        return '#ffffff';
     }
   };
 
   const getSizeStyles = (): ViewStyle => {
     switch (size) {
       case 'sm':
-        return { paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md };
-      case 'lg':
-        return { paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl };
-      default:
         return { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.lg };
+      case 'lg':
+        return { paddingVertical: Spacing.lg, paddingHorizontal: Spacing.xl };
+      default:
+        return { paddingVertical: Spacing.md, paddingHorizontal: Spacing.xl };
     }
   };
 
   const getTextSize = () => {
     switch (size) {
       case 'sm':
-        return FontSize.sm;
+        return FontSize.body;
       case 'lg':
-        return FontSize.lg;
+        return FontSize.button;
       default:
-        return FontSize.md;
+        return FontSize.button;
     }
   };
 
@@ -93,7 +94,7 @@ export function Button({
         getSizeStyles(),
         {
           backgroundColor: getBackgroundColor(),
-          borderColor: variant === 'outline' ? colors.primary : 'transparent',
+          borderColor: variant === 'outline' ? colors.text : 'transparent',
           borderWidth: variant === 'outline' ? 1 : 0,
           width: fullWidth ? '100%' : 'auto',
         },
@@ -101,10 +102,10 @@ export function Button({
       ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
+      activeOpacity={0.85}
     >
       {loading ? (
-        <ActivityIndicator color={getTextColor()} />
+        <ActivityIndicator color={getTextColor()} size="small" />
       ) : (
         <Text
           style={[
@@ -122,12 +123,12 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
   text: {
-    fontWeight: '600',
+    fontWeight: FontWeight.semibold,
   },
 });

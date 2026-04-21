@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { CATEGORIES, CategoryKey } from '@/constants/categories';
-import { Spacing, BorderRadius, FontSize } from '@/constants/theme';
+import { CATEGORIES } from '@/constants/categories';
+import { Spacing, BorderRadius, FontSize, FontWeight } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface CategoryFilterProps {
@@ -14,88 +14,117 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
   const { colors } = useColorScheme();
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}
-    >
-      <TouchableOpacity
-        style={[
-          styles.chip,
-          {
-            backgroundColor: !selected ? colors.primary : colors.surface,
-            borderColor: colors.border,
-          },
-        ]}
-        onPress={() => onSelect(null)}
+    <View style={[styles.wrapper, { borderBottomColor: colors.borderLight }]}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.container}
       >
-        <Ionicons
-          name="apps"
-          size={16}
-          color={!selected ? '#FFFFFF' : colors.textSecondary}
-        />
-        <Text
-          style={[
-            styles.chipText,
-            { color: !selected ? '#FFFFFF' : colors.text },
-          ]}
+        {/* All category */}
+        <TouchableOpacity
+          style={styles.category}
+          onPress={() => onSelect(null)}
+          activeOpacity={0.7}
         >
-          Tất cả
-        </Text>
-      </TouchableOpacity>
-
-      {CATEGORIES.map((category) => {
-        const isSelected = selected === category.key;
-        return (
-          <TouchableOpacity
-            key={category.key}
+          <View
             style={[
-              styles.chip,
-              {
-                backgroundColor: isSelected ? category.color : colors.surface,
-                borderColor: isSelected ? category.color : colors.border,
-              },
+              styles.iconContainer,
+              { backgroundColor: !selected ? colors.text : colors.surfaceSecondary },
             ]}
-            onPress={() => onSelect(category.key)}
           >
             <Ionicons
-              name={category.icon}
-              size={16}
-              color={isSelected ? '#FFFFFF' : category.color}
+              name="grid"
+              size={20}
+              color={!selected ? '#ffffff' : colors.textSecondary}
             />
-            <Text
-              style={[
-                styles.chipText,
-                { color: isSelected ? '#FFFFFF' : colors.text },
-              ]}
+          </View>
+          <Text
+            style={[
+              styles.label,
+              {
+                color: !selected ? colors.text : colors.textSecondary,
+                fontWeight: !selected ? FontWeight.semibold : FontWeight.medium,
+              },
+            ]}
+          >
+            Tất cả
+          </Text>
+          {!selected && <View style={[styles.indicator, { backgroundColor: colors.text }]} />}
+        </TouchableOpacity>
+
+        {CATEGORIES.map((category) => {
+          const isSelected = selected === category.key;
+          return (
+            <TouchableOpacity
+              key={category.key}
+              style={styles.category}
+              onPress={() => onSelect(category.key)}
+              activeOpacity={0.7}
             >
-              {category.nameVi}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: isSelected ? category.color : colors.surfaceSecondary },
+                ]}
+              >
+                <Ionicons
+                  name={category.icon}
+                  size={20}
+                  color={isSelected ? '#ffffff' : colors.textSecondary}
+                />
+              </View>
+              <Text
+                style={[
+                  styles.label,
+                  {
+                    color: isSelected ? colors.text : colors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.semibold : FontWeight.medium,
+                  },
+                ]}
+              >
+                {category.nameVi}
+              </Text>
+              {isSelected && <View style={[styles.indicator, { backgroundColor: colors.text }]} />}
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    borderBottomWidth: 1,
+  },
   container: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.xl,
   },
-  chip: {
-    flexDirection: 'row',
+  category: {
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    gap: Spacing.xs,
-    marginRight: Spacing.xs,
+    position: 'relative',
+    paddingBottom: Spacing.sm,
   },
-  chipText: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xs,
+  },
+  label: {
+    fontSize: FontSize.tag,
+    textAlign: 'center',
+  },
+  indicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: '25%',
+    right: '25%',
+    height: 2,
+    borderRadius: 1,
   },
 });

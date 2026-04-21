@@ -6,9 +6,10 @@ import {
   StyleSheet,
   TextInputProps,
   ViewStyle,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, BorderRadius, FontSize } from '@/constants/theme';
+import { Spacing, BorderRadius, FontSize, FontWeight } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface InputProps extends TextInputProps {
@@ -41,7 +42,7 @@ export function Input({
         style={[
           styles.inputContainer,
           {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.background,
             borderColor: error ? colors.error : colors.border,
           },
         ]}
@@ -59,22 +60,23 @@ export function Input({
             styles.input,
             {
               color: colors.text,
-              paddingLeft: leftIcon ? 0 : Spacing.md,
-              paddingRight: rightIcon ? 0 : Spacing.md,
+              paddingLeft: leftIcon ? 0 : Spacing.lg,
+              paddingRight: rightIcon ? 0 : Spacing.lg,
             },
             style,
           ]}
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={colors.textTertiary}
           {...props}
         />
         {rightIcon && (
-          <Ionicons
-            name={rightIcon}
-            size={20}
-            color={colors.textSecondary}
-            style={styles.rightIcon}
-            onPress={onRightIconPress}
-          />
+          <TouchableOpacity onPress={onRightIconPress} disabled={!onRightIconPress}>
+            <Ionicons
+              name={rightIcon}
+              size={20}
+              color={colors.textSecondary}
+              style={styles.rightIcon}
+            />
+          </TouchableOpacity>
         )}
       </View>
       {error && (
@@ -89,32 +91,33 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   label: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
-    marginBottom: Spacing.xs,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.medium,
+    marginBottom: Spacing.sm,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    height: 48,
+    borderRadius: BorderRadius.sm,
+    height: 52,
   },
   input: {
     flex: 1,
-    fontSize: FontSize.md,
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.medium,
     height: '100%',
   },
   leftIcon: {
-    marginLeft: Spacing.md,
+    marginLeft: Spacing.lg,
     marginRight: Spacing.sm,
   },
   rightIcon: {
-    marginRight: Spacing.md,
+    marginRight: Spacing.lg,
     marginLeft: Spacing.sm,
   },
   error: {
-    fontSize: FontSize.xs,
+    fontSize: FontSize.small,
     marginTop: Spacing.xs,
   },
 });

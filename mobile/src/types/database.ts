@@ -147,8 +147,8 @@ export interface Database {
     Functions: {
       search_nearby_providers: {
         Args: {
-          lat: number;
-          lng: number;
+          p_lat: number;
+          p_lng: number;
           radius_km?: number;
           category_filter?: string | null;
         };

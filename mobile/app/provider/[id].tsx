@@ -9,26 +9,36 @@ import {
   Linking,
   Dimensions,
   ActivityIndicator,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
-import { Button } from '@/components/ui/Button';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProviderStore } from '@/stores/provider.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useFavoritesStore } from '@/stores/favorites.store';
 import { getCategoryByKey } from '@/constants/categories';
-import { Spacing, FontSize, BorderRadius, Shadow } from '@/constants/theme';
+import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '@/constants/theme';
 import { Provider } from '@/types/database';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IMAGE_HEIGHT = SCREEN_WIDTH * 0.75;
+
+const PLACEHOLDER_IMAGES = [
+  'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80',
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+  'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80',
+  'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&q=80',
+];
 
 export default function ProviderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { colors } = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const { colors, isDark } = useColorScheme();
   const { session } = useAuthStore();
   const { getProviderById } = useProviderStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -64,9 +74,16 @@ export default function ProviderDetailScreen() {
 
   const handleDirections = () => {
     if (provider?.lat && provider?.lng) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${provider.lat},${provider.lng}`;
-      Linking.openURL(url);
+      const url = Platform.select({
+        ios: `maps:?daddr=${provider.lat},${provider.lng}`,
+        android: `google.navigation:q=${provider.lat},${provider.lng}`,
+      });
+      if (url) Linking.openURL(url);
     }
+  };
+
+  const handleShare = () => {
+    // Share functionality
   };
 
   const handleToggleFavorite = async () => {
@@ -76,11 +93,38 @@ export default function ProviderDetailScreen() {
 
   const category = provider ? getCategoryByKey(provider.category) : null;
   const isFav = provider ? isFavorite(provider.id) : false;
-  const photos = provider?.photos?.length ? provider.photos : ['https://via.placeholder.com/400x300?text=XE247'];
+
+  const getPhotos = () => {
+    if (provider?.photos?.length) return provider.photos;
+    const index = (provider?.id?.charCodeAt(0) || 0) % PLACEHOLDER_IMAGES.length;
+    return [PLACEHOLDER_IMAGES[index]];
+  };
+
+  const photos = getPhotos();
+
+  const getRegionName = () => {
+    const metadata = provider?.metadata as any;
+    if (metadata?.region_code) {
+      const regionNames: Record<string, string> = {
+        hanoi: 'Hà Nội',
+        hcm: 'TP. Hồ Chí Minh',
+        danang: 'Đà Nẵng',
+        haiphong: 'Hải Phòng',
+        cantho: 'Cần Thơ',
+        binhduong: 'Bình Dương',
+        dongnai: 'Đồng Nai',
+        khanhhoa: 'Nha Trang',
+        lamdong: 'Đà Lạt',
+      };
+      return regionNames[metadata.region_code];
+    }
+    return null;
+  };
 
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle="light-content" />
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -91,8 +135,17 @@ export default function ProviderDetailScreen() {
   if (!provider) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
         <View style={styles.loading}>
-          <Text style={{ color: colors.text }}>Không tìm thấy tiệm</Text>
+          <Text style={[styles.errorText, { color: colors.text }]}>
+            Không tìm thấy địa điểm
+          </Text>
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: colors.primary }]}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>Quay lại</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -100,7 +153,10 @@ export default function ProviderDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <StatusBar barStyle="light-content" />
+
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+        {/* Image Gallery */}
         <View style={styles.imageContainer}>
           <ScrollView
             horizontal
@@ -116,156 +172,226 @@ export default function ProviderDetailScreen() {
                 key={index}
                 source={{ uri: photo }}
                 style={styles.image}
+                resizeMode="cover"
               />
             ))}
           </ScrollView>
-          <View style={styles.imageOverlay}>
+
+          {/* Top overlay buttons */}
+          <View style={[styles.topBar, { paddingTop: insets.top + Spacing.sm }]}>
             <TouchableOpacity
-              style={[styles.backBtn, { backgroundColor: colors.background }]}
+              style={[styles.iconButton, { backgroundColor: colors.background }]}
               onPress={() => router.back()}
             >
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
             </TouchableOpacity>
-            {session && (
+            <View style={styles.topBarRight}>
               <TouchableOpacity
-                style={[styles.favoriteBtn, { backgroundColor: colors.background }]}
-                onPress={handleToggleFavorite}
+                style={[styles.iconButton, { backgroundColor: colors.background }]}
+                onPress={handleShare}
               >
-                <Ionicons
-                  name={isFav ? 'heart' : 'heart-outline'}
-                  size={24}
-                  color={isFav ? colors.error : colors.text}
-                />
+                <Ionicons name="share-outline" size={22} color={colors.text} />
               </TouchableOpacity>
-            )}
+              {session && (
+                <TouchableOpacity
+                  style={[styles.iconButton, { backgroundColor: colors.background }]}
+                  onPress={handleToggleFavorite}
+                >
+                  <Ionicons
+                    name={isFav ? 'heart' : 'heart-outline'}
+                    size={22}
+                    color={isFav ? colors.primary : colors.text}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
+
+          {/* Image pagination */}
           {photos.length > 1 && (
             <View style={styles.pagination}>
-              {photos.map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.paginationDot,
-                    {
-                      backgroundColor: index === activeImageIndex ? colors.primary : 'rgba(255,255,255,0.5)',
-                    },
-                  ]}
-                />
-              ))}
+              <View style={styles.paginationBg}>
+                <Text style={styles.paginationText}>
+                  {activeImageIndex + 1} / {photos.length}
+                </Text>
+              </View>
             </View>
           )}
         </View>
 
-        <View style={[styles.content, { backgroundColor: colors.background }]}>
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.name, { color: colors.text }]}>{provider.name}</Text>
-            {category && (
-              <View style={[styles.categoryBadge, { backgroundColor: category.color + '20' }]}>
-                <Ionicons name={category.icon} size={14} color={category.color} />
-                <Text style={[styles.categoryText, { color: category.color }]}>
-                  {category.nameVi}
+
+            <View style={styles.ratingRow}>
+              <View style={styles.rating}>
+                <Ionicons name="star" size={14} color={colors.primary} />
+                <Text style={[styles.ratingText, { color: colors.text }]}>
+                  {provider.rating_avg?.toFixed(1) || 'Mới'}
                 </Text>
+                {provider.rating_count > 0 && (
+                  <Text style={[styles.reviewCount, { color: colors.textSecondary }]}>
+                    ({provider.rating_count} đánh giá)
+                  </Text>
+                )}
               </View>
-            )}
-          </View>
-
-          <View style={styles.ratingRow}>
-            <View style={styles.rating}>
-              <Ionicons name="star" size={18} color={colors.star} />
-              <Text style={[styles.ratingText, { color: colors.text }]}>
-                {provider.rating_avg?.toFixed(1) || '0.0'}
-              </Text>
-              <Text style={[styles.ratingCount, { color: colors.textSecondary }]}>
-                ({provider.rating_count || 0} đánh giá)
-              </Text>
-            </View>
-            {provider.status === 'active' && (
-              <View style={styles.statusBadge}>
-                <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
-                <Text style={[styles.statusText, { color: colors.success }]}>Đang mở</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={[styles.infoSection, { borderColor: colors.border }]}>
-            <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={20} color={colors.textSecondary} />
-              <Text style={[styles.infoText, { color: colors.text }]}>
-                {provider.address || 'Chưa có địa chỉ'}
-              </Text>
-            </View>
-            {provider.phone && (
-              <View style={styles.infoRow}>
-                <Ionicons name="call-outline" size={20} color={colors.textSecondary} />
-                <Text style={[styles.infoText, { color: colors.text }]}>
-                  {provider.phone}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {provider.services && provider.services.length > 0 && (
-            <View style={styles.servicesSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Dịch vụ</Text>
-              <View style={styles.servicesList}>
-                {provider.services.map((service, index) => (
-                  <View
-                    key={index}
-                    style={[styles.serviceChip, { backgroundColor: colors.surface }]}
-                  >
-                    <Text style={[styles.serviceText, { color: colors.text }]}>{service}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {provider.lat && provider.lng && (
-            <View style={styles.mapSection}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Vị trí</Text>
-              <TouchableOpacity onPress={handleDirections} activeOpacity={0.9}>
-                <MapView
-                  style={styles.map}
-                  initialRegion={{
-                    latitude: provider.lat,
-                    longitude: provider.lng,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }}
-                  scrollEnabled={false}
-                  zoomEnabled={false}
-                >
-                  <Marker
-                    coordinate={{ latitude: provider.lat, longitude: provider.lng }}
-                    title={provider.name}
-                  />
-                </MapView>
-                <View style={[styles.mapOverlay, { backgroundColor: colors.primary + '10' }]}>
-                  <Ionicons name="navigate" size={16} color={colors.primary} />
-                  <Text style={[styles.mapOverlayText, { color: colors.primary }]}>
-                    Chỉ đường
+              {category && (
+                <View style={[styles.categoryPill, { backgroundColor: category.color + '15' }]}>
+                  <Ionicons name={category.icon} size={14} color={category.color} />
+                  <Text style={[styles.categoryText, { color: category.color }]}>
+                    {category.nameVi}
                   </Text>
                 </View>
-              </TouchableOpacity>
+              )}
             </View>
+          </View>
+
+          {/* Divider */}
+          <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
+
+          {/* Info Section */}
+          <View style={styles.infoSection}>
+            <View style={styles.infoRow}>
+              <View style={[styles.infoIcon, { backgroundColor: colors.surfaceSecondary }]}>
+                <Ionicons name="location-outline" size={20} color={colors.text} />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Địa chỉ</Text>
+                <Text style={[styles.infoValue, { color: colors.text }]}>
+                  {provider.address || getRegionName() || 'Chưa cập nhật'}
+                </Text>
+              </View>
+            </View>
+
+            {provider.phone && (
+              <View style={styles.infoRow}>
+                <View style={[styles.infoIcon, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Ionicons name="call-outline" size={20} color={colors.text} />
+                </View>
+                <View style={styles.infoContent}>
+                  <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Điện thoại</Text>
+                  <Text style={[styles.infoValue, { color: colors.text }]}>
+                    {provider.phone}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <View style={styles.infoRow}>
+              <View style={[styles.infoIcon, { backgroundColor: colors.surfaceSecondary }]}>
+                <Ionicons name="time-outline" size={20} color={colors.text} />
+              </View>
+              <View style={styles.infoContent}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Trạng thái</Text>
+                <View style={styles.statusRow}>
+                  <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
+                  <Text style={[styles.statusText, { color: colors.success }]}>Đang mở cửa</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* Map Section */}
+          {provider.lat && provider.lng && (
+            <>
+              <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
+
+              <View style={styles.mapSection}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Vị trí</Text>
+                <TouchableOpacity
+                  onPress={handleDirections}
+                  activeOpacity={0.95}
+                  style={styles.mapContainer}
+                >
+                  <MapView
+                    style={styles.map}
+                    initialRegion={{
+                      latitude: provider.lat,
+                      longitude: provider.lng,
+                      latitudeDelta: 0.008,
+                      longitudeDelta: 0.008,
+                    }}
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    pitchEnabled={false}
+                    rotateEnabled={false}
+                  >
+                    <Marker
+                      coordinate={{ latitude: provider.lat, longitude: provider.lng }}
+                      title={provider.name}
+                    >
+                      <View style={[styles.marker, { backgroundColor: colors.primary }]}>
+                        <Ionicons name="location" size={20} color="#ffffff" />
+                      </View>
+                    </Marker>
+                  </MapView>
+                  <View style={styles.mapOverlay}>
+                    <View style={[styles.directionsButton, { backgroundColor: colors.background }]}>
+                      <Ionicons name="navigate" size={18} color={colors.primary} />
+                      <Text style={[styles.directionsText, { color: colors.primary }]}>
+                        Chỉ đường
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </>
           )}
+
+          {/* Services */}
+          {provider.services && provider.services.length > 0 && (
+            <>
+              <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
+
+              <View style={styles.servicesSection}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Dịch vụ</Text>
+                <View style={styles.servicesList}>
+                  {provider.services.map((service, index) => (
+                    <View
+                      key={index}
+                      style={[styles.serviceChip, { backgroundColor: colors.surfaceSecondary }]}
+                    >
+                      <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                      <Text style={[styles.serviceText, { color: colors.text }]}>{service}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* Spacer for footer */}
+          <View style={{ height: 100 }} />
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.background, borderColor: colors.border }]}>
+      {/* Footer CTA */}
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.borderLight,
+            paddingBottom: insets.bottom || Spacing.lg,
+          },
+        ]}
+      >
         <TouchableOpacity
-          style={[styles.contactBtn, { backgroundColor: colors.surface }]}
+          style={[styles.zaloButton, { borderColor: colors.border }]}
           onPress={handleZalo}
         >
-          <Ionicons name="chatbubble-ellipses" size={24} color={colors.primary} />
-          <Text style={[styles.contactBtnText, { color: colors.primary }]}>Zalo</Text>
+          <Ionicons name="chatbubble-ellipses" size={22} color={colors.text} />
+          <Text style={[styles.zaloText, { color: colors.text }]}>Zalo</Text>
         </TouchableOpacity>
-        <Button
-          title="Gọi ngay"
+        <TouchableOpacity
+          style={[styles.callButton, { backgroundColor: colors.primary }]}
           onPress={handleCall}
-          style={{ flex: 2 }}
-          size="lg"
-        />
+        >
+          <Ionicons name="call" size={20} color="#ffffff" />
+          <Text style={styles.callText}>Gọi ngay</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -279,85 +405,82 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: Spacing.lg,
+  },
+  errorText: {
+    fontSize: FontSize.button,
+  },
+  backButton: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.sm,
+  },
+  backButtonText: {
+    color: '#ffffff',
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.semibold,
   },
   imageContainer: {
     position: 'relative',
   },
   image: {
     width: SCREEN_WIDTH,
-    height: 280,
-    backgroundColor: '#E0E0E0',
+    height: IMAGE_HEIGHT,
+    backgroundColor: '#1a1a1a',
   },
-  imageOverlay: {
+  topBar: {
     position: 'absolute',
-    top: 50,
-    left: Spacing.md,
-    right: Spacing.md,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Shadow.sm,
-  },
-  favoriteBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Shadow.sm,
-  },
-  pagination: {
-    position: 'absolute',
-    bottom: Spacing.md,
+    top: 0,
     left: 0,
     right: 0,
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
   },
-  paginationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  content: {
-    padding: Spacing.md,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    marginTop: -Spacing.lg,
-  },
-  header: {
-    marginBottom: Spacing.sm,
-  },
-  name: {
-    fontSize: FontSize.xxl,
-    fontWeight: '700',
-    marginBottom: Spacing.sm,
-  },
-  categoryBadge: {
+  topBarRight: {
     flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
-    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    ...Shadow.card,
+  },
+  pagination: {
+    position: 'absolute',
+    bottom: Spacing.lg,
+    right: Spacing.lg,
+  },
+  paginationBg: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.sm,
-    gap: 4,
   },
-  categoryText: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
+  paginationText: {
+    color: '#ffffff',
+    fontSize: FontSize.tag,
+    fontWeight: FontWeight.medium,
+  },
+  content: {
+    paddingTop: Spacing.lg,
+  },
+  header: {
+    paddingHorizontal: Spacing.lg,
+  },
+  name: {
+    fontSize: FontSize.subheading,
+    fontWeight: FontWeight.bold,
+    letterSpacing: -0.3,
+    marginBottom: Spacing.sm,
   },
   ratingRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    justifyContent: 'space-between',
   },
   rating: {
     flexDirection: 'row',
@@ -365,16 +488,60 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingText: {
-    fontSize: FontSize.lg,
-    fontWeight: '600',
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.semibold,
   },
-  ratingCount: {
-    fontSize: FontSize.sm,
+  reviewCount: {
+    fontSize: FontSize.body,
   },
-  statusBadge: {
+  categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
     gap: 4,
+  },
+  categoryText: {
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semibold,
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.lg,
+    marginHorizontal: Spacing.lg,
+  },
+  infoSection: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.lg,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+  },
+  infoIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: FontSize.small,
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.medium,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   statusDot: {
     width: 8,
@@ -382,31 +549,52 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusText: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.medium,
   },
-  infoSection: {
-    paddingVertical: Spacing.md,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    gap: Spacing.sm,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: FontSize.md,
-  },
-  servicesSection: {
-    marginTop: Spacing.lg,
+  mapSection: {
+    paddingHorizontal: Spacing.lg,
   },
   sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: '600',
-    marginBottom: Spacing.sm,
+    fontSize: FontSize.feature,
+    fontWeight: FontWeight.semibold,
+    marginBottom: Spacing.md,
+  },
+  mapContainer: {
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  map: {
+    height: 180,
+  },
+  marker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapOverlay: {
+    position: 'absolute',
+    bottom: Spacing.md,
+    right: Spacing.md,
+  },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    gap: 6,
+    ...Shadow.card,
+  },
+  directionsText: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.semibold,
+  },
+  servicesSection: {
+    paddingHorizontal: Spacing.lg,
   },
   servicesList: {
     flexDirection: 'row',
@@ -414,54 +602,54 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   serviceChip: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-  },
-  serviceText: {
-    fontSize: FontSize.sm,
-  },
-  mapSection: {
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.xl,
-  },
-  map: {
-    height: 150,
-    borderRadius: BorderRadius.lg,
-    overflow: 'hidden',
-  },
-  mapOverlay: {
-    position: 'absolute',
-    bottom: Spacing.sm,
-    right: Spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    gap: 4,
+    gap: 6,
   },
-  mapOverlayText: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
+  serviceText: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.medium,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
     borderTopWidth: 1,
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
-  contactBtn: {
+  zaloButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.xs,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    gap: Spacing.sm,
   },
-  contactBtnText: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
+  zaloText: {
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.semibold,
+  },
+  callButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.sm,
+    gap: Spacing.sm,
+  },
+  callText: {
+    color: '#ffffff',
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.semibold,
   },
 });

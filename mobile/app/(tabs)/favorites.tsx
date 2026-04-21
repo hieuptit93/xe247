@@ -5,22 +5,23 @@ import {
   StyleSheet,
   RefreshControl,
   Text,
+  TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ProviderCard } from '@/components/ProviderCard';
-import { Button } from '@/components/ui/Button';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuthStore } from '@/stores/auth.store';
 import { useFavoritesStore } from '@/stores/favorites.store';
-import { Spacing, FontSize } from '@/constants/theme';
+import { Spacing, FontSize, FontWeight, BorderRadius } from '@/constants/theme';
 import { Provider } from '@/types/database';
 
 export default function FavoritesScreen() {
   const router = useRouter();
-  const { colors } = useColorScheme();
-  const { session, isProvider } = useAuthStore();
+  const { colors, isDark } = useColorScheme();
+  const { session, isProvider, isGuest } = useAuthStore();
   const { favorites, isLoading, fetchFavorites } = useFavoritesStore();
 
   const loadFavorites = useCallback(async () => {
@@ -37,22 +38,33 @@ export default function FavoritesScreen() {
     router.push(`/provider/${provider.id}`);
   };
 
-  if (!session) {
+  if (!session || isGuest) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.notLoggedIn}>
-          <Ionicons name="heart-outline" size={64} color={colors.textSecondary} />
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Đã lưu</Text>
+        </View>
+        <View style={styles.centered}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="heart-outline" size={48} color={colors.primary} />
+          </View>
           <Text style={[styles.title, { color: colors.text }]}>
-            Đăng nhập để lưu yêu thích
+            {isGuest ? 'Đăng nhập để lưu yêu thích' : 'Đăng nhập để xem danh sách đã lưu'}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Lưu lại các tiệm bạn thường lui tới
+            {isGuest
+              ? 'Tạo tài khoản để lưu lại các tiệm bạn ưa thích'
+              : 'Bạn có thể tạo danh sách yêu thích và lưu lại các tiệm hay lui tới'}
           </Text>
-          <Button
-            title="Đăng nhập"
+          <TouchableOpacity
+            style={[styles.loginButton, { backgroundColor: colors.primary }]}
             onPress={() => router.push('/(auth)/login')}
-            style={{ marginTop: Spacing.lg }}
-          />
+          >
+            <Text style={styles.loginButtonText}>
+              {isGuest ? 'Tạo tài khoản' : 'Đăng nhập'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -61,8 +73,14 @@ export default function FavoritesScreen() {
   if (isProvider) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.providerView}>
-          <Ionicons name="document-text-outline" size={64} color={colors.textSecondary} />
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Đơn hàng</Text>
+        </View>
+        <View style={styles.centered}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.surfaceSecondary }]}>
+            <Ionicons name="document-text-outline" size={48} color={colors.textSecondary} />
+          </View>
           <Text style={[styles.title, { color: colors.text }]}>
             Quản lý đơn hàng
           </Text>
@@ -76,6 +94,13 @@ export default function FavoritesScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Đã lưu</Text>
+      </View>
+
       <FlatList
         data={favorites}
         keyExtractor={(item) => item.id}
@@ -96,16 +121,38 @@ export default function FavoritesScreen() {
           styles.listContent,
           favorites.length === 0 && styles.emptyList,
         ]}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          favorites.length > 0 ? (
+            <View style={styles.listHeader}>
+              <Text style={[styles.resultCount, { color: colors.text }]}>
+                {favorites.length} địa điểm đã lưu
+              </Text>
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="heart-outline" size={48} color={colors.textSecondary} />
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              Chưa có tiệm yêu thích
-            </Text>
-            <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
-              Nhấn vào icon trái tim để lưu
-            </Text>
-          </View>
+          !isLoading ? (
+            <View style={styles.empty}>
+              <View style={[styles.iconCircle, { backgroundColor: colors.surfaceSecondary }]}>
+                <Ionicons name="heart-outline" size={48} color={colors.textSecondary} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                Chưa có gì trong danh sách
+              </Text>
+              <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
+                Khi bạn thấy tiệm ưng ý, nhấn vào biểu tượng trái tim để lưu vào đây
+              </Text>
+              <TouchableOpacity
+                style={[styles.exploreButton, { borderColor: colors.text }]}
+                onPress={() => router.push('/')}
+              >
+                <Text style={[styles.exploreButtonText, { color: colors.text }]}>
+                  Bắt đầu khám phá
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null
         }
       />
     </SafeAreaView>
@@ -116,48 +163,95 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
+  },
+  headerTitle: {
+    fontSize: FontSize.heading,
+    fontWeight: FontWeight.bold,
+    letterSpacing: -0.5,
+  },
   listContent: {
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xxxl,
+  },
+  listHeader: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+  },
+  resultCount: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.medium,
   },
   emptyList: {
     flex: 1,
   },
-  notLoggedIn: {
+  centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.xl,
+    padding: Spacing.xxxl,
   },
-  providerView: {
-    flex: 1,
-    justifyContent: 'center',
+  iconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     alignItems: 'center',
-    padding: Spacing.xl,
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
   },
   title: {
-    fontSize: FontSize.xl,
-    fontWeight: '600',
-    marginTop: Spacing.lg,
+    fontSize: FontSize.cardHeading,
+    fontWeight: FontWeight.semibold,
     textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: FontSize.md,
-    marginTop: Spacing.sm,
+    fontSize: FontSize.body,
     textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: Spacing.lg,
+  },
+  loginButton: {
+    marginTop: Spacing.xl,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xxxl,
+    borderRadius: BorderRadius.sm,
+  },
+  loginButtonText: {
+    color: '#ffffff',
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.semibold,
   },
   empty: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.xl,
+    padding: Spacing.xxxl,
   },
-  emptyText: {
-    fontSize: FontSize.lg,
-    fontWeight: '500',
-    marginTop: Spacing.md,
+  emptyTitle: {
+    fontSize: FontSize.cardHeading,
+    fontWeight: FontWeight.semibold,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: FontSize.sm,
-    marginTop: Spacing.xs,
+    fontSize: FontSize.body,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: Spacing.lg,
+  },
+  exploreButton: {
+    marginTop: Spacing.xl,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+  },
+  exploreButtonText: {
+    fontSize: FontSize.button,
+    fontWeight: FontWeight.semibold,
   },
 });

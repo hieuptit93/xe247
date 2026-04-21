@@ -27,7 +27,7 @@ export const useProviderStore = create<ProviderState>((set, get) => ({
   providers: [],
   selectedProvider: null,
   isLoading: false,
-  searchRadius: 5,
+  searchRadius: 50, // Increased default radius
   selectedCategory: null,
 
   searchNearby: async (location: Location) => {
@@ -37,8 +37,8 @@ export const useProviderStore = create<ProviderState>((set, get) => ({
       const { searchRadius, selectedCategory } = get();
 
       const { data, error } = await supabase.rpc('search_nearby_providers', {
-        lat: location.lat,
-        lng: location.lng,
+        p_lat: location.lat,
+        p_lng: location.lng,
         radius_km: searchRadius,
         category_filter: selectedCategory,
       } as any);

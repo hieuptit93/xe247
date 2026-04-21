@@ -2,14 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 export type CategoryKey =
   | 'repair'
-  | 'maintenance'
   | 'car_wash'
-  | 'tire'
-  | 'battery'
-  | 'ev_charging'
-  | 'parts'
-  | 'towing'
-  | 'insurance';
+  | 'car_parts'
+  | 'ev_charging';
 
 export interface Category {
   key: CategoryKey;
@@ -19,72 +14,50 @@ export interface Category {
   color: string;
 }
 
+// Categories matching Supabase data
 export const CATEGORIES: Category[] = [
   {
     key: 'repair',
     name: 'Repair',
     nameVi: 'Sửa chữa',
-    icon: 'build',
-    color: '#FF6B35',
-  },
-  {
-    key: 'maintenance',
-    name: 'Maintenance',
-    nameVi: 'Bảo dưỡng',
-    icon: 'settings',
-    color: '#4CAF50',
+    icon: 'construct',
+    color: '#ff385c', // Rausch Red
   },
   {
     key: 'car_wash',
     name: 'Car Wash',
     nameVi: 'Rửa xe',
     icon: 'water',
-    color: '#2196F3',
+    color: '#00a699',
   },
   {
-    key: 'tire',
-    name: 'Tire',
-    nameVi: 'Lốp xe',
-    icon: 'ellipse-outline',
-    color: '#607D8B',
-  },
-  {
-    key: 'battery',
-    name: 'Battery',
-    nameVi: 'Ắc quy',
-    icon: 'battery-charging',
-    color: '#FFC107',
+    key: 'car_parts',
+    name: 'Parts',
+    nameVi: 'Phụ tùng',
+    icon: 'cog',
+    color: '#fc642d',
   },
   {
     key: 'ev_charging',
     name: 'EV Charging',
-    nameVi: 'Sạc điện',
+    nameVi: 'Sạc EV',
     icon: 'flash',
-    color: '#00BCD4',
-  },
-  {
-    key: 'parts',
-    name: 'Parts',
-    nameVi: 'Phụ tùng',
-    icon: 'cube',
-    color: '#9C27B0',
-  },
-  {
-    key: 'towing',
-    name: 'Towing',
-    nameVi: 'Cứu hộ',
-    icon: 'car-sport',
-    color: '#F44336',
-  },
-  {
-    key: 'insurance',
-    name: 'Insurance',
-    nameVi: 'Bảo hiểm',
-    icon: 'shield-checkmark',
-    color: '#3F51B5',
+    color: '#00d1b2',
   },
 ];
 
 export const getCategoryByKey = (key: string): Category | undefined => {
   return CATEGORIES.find((c) => c.key === key);
+};
+
+export const getCategoryColor = (key: string): string => {
+  return getCategoryByKey(key)?.color || '#767676';
+};
+
+export const getCategoryIcon = (key: string): keyof typeof Ionicons.glyphMap => {
+  return getCategoryByKey(key)?.icon || 'help-circle';
+};
+
+export const getCategoryName = (key: string): string => {
+  return getCategoryByKey(key)?.nameVi || key;
 };
