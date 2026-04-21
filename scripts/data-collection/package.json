@@ -14,10 +14,10 @@
     "export:supabase": "node export-to-supabase.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.0",
     "axios": "^1.6.0",
     "dotenv": "^16.3.0"
   },
-  "devDependencies": {},
   "keywords": [
     "xe247",
     "data-collection",

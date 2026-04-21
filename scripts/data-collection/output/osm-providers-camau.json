@@ -1,0 +1,40 @@
+[
+  {
+    "osm_id": "6083696585",
+    "osm_type": "node",
+    "name": "Chành xe Tỷ Phúc",
+    "name_en": null,
+    "description": null,
+    "category": "repair",
+    "osm_tags": [
+      "shop=car"
+    ],
+    "lat": 9.1591196,
+    "lng": 105.1567688,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": null,
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "camau",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/6083696585",
+    "collected_at": "2026-04-21T04:28:26.522Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  }
+]

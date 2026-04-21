@@ -1,0 +1,39 @@
+[
+  {
+    "osm_id": "12438400780",
+    "osm_type": "node",
+    "name": "Sửa chữa xe máy",
+    "name_en": "Motorcycle repair",
+    "description": null,
+    "category": "repair",
+    "osm_tags": [
+      "shop=motorcycle_repair"
+    ],
+    "lat": 11.8392334,
+    "lng": 108.8098559,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": null,
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "motorcycle"
+    ],
+    "region_code": "ninhthuan",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/12438400780",
+    "collected_at": "2026-04-21T04:25:54.142Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  }
+]

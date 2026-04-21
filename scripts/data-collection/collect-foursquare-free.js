@@ -87,7 +87,7 @@ function fetchFoursquare(lat, lng, categoryId, radius = 5000) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Authorization': API_KEY
+        'Authorization': API_KEY.startsWith('fsq') ? API_KEY : API_KEY
       }
     };
 

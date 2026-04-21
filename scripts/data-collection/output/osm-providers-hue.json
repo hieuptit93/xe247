@@ -1,0 +1,40 @@
+[
+  {
+    "osm_id": "5032771425",
+    "osm_type": "node",
+    "name": "Tâm Thanh",
+    "name_en": null,
+    "description": null,
+    "category": "car_parts",
+    "osm_tags": [
+      "shop=tyres"
+    ],
+    "lat": 16.4624015,
+    "lng": 107.5693522,
+    "address": "150, Lê Duẩn",
+    "city": null,
+    "district": null,
+    "street": "Lê Duẩn",
+    "housenumber": "150",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": null,
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "hue",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/5032771425",
+    "collected_at": "2026-04-21T04:24:28.712Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  }
+]

@@ -20,19 +20,154 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
-// Vietnam bounding boxes
+// Vietnam bounding boxes - All major provinces
 const REGIONS = {
+  // === MIỀN BẮC ===
   hanoi: {
     name: 'Hà Nội',
-    bbox: [20.8, 105.5, 21.2, 106.1] // south, west, north, east
+    bbox: [20.8, 105.5, 21.2, 106.1]
   },
-  hcm: {
-    name: 'TP. Hồ Chí Minh',
-    bbox: [10.5, 106.3, 11.2, 107.0]
+  haiphong: {
+    name: 'Hải Phòng',
+    bbox: [20.75, 106.55, 20.95, 106.85]
+  },
+  quangninh: {
+    name: 'Quảng Ninh',
+    bbox: [20.85, 106.7, 21.25, 107.4]
+  },
+  bacninh: {
+    name: 'Bắc Ninh',
+    bbox: [21.05, 105.95, 21.25, 106.25]
+  },
+  hungyen: {
+    name: 'Hưng Yên',
+    bbox: [20.6, 105.85, 20.95, 106.15]
+  },
+  haiduong: {
+    name: 'Hải Dương',
+    bbox: [20.85, 106.2, 21.1, 106.55]
+  },
+  thaibinh: {
+    name: 'Thái Bình',
+    bbox: [20.35, 106.25, 20.7, 106.65]
+  },
+  namdinh: {
+    name: 'Nam Định',
+    bbox: [20.15, 106.0, 20.5, 106.35]
+  },
+  ninhbinh: {
+    name: 'Ninh Bình',
+    bbox: [20.0, 105.75, 20.35, 106.1]
+  },
+  thanhhoa: {
+    name: 'Thanh Hóa',
+    bbox: [19.65, 105.2, 20.15, 105.95]
+  },
+  nghean: {
+    name: 'Nghệ An',
+    bbox: [18.6, 104.4, 19.45, 105.5]
+  },
+  hatinh: {
+    name: 'Hà Tĩnh',
+    bbox: [18.15, 105.5, 18.65, 106.2]
+  },
+
+  // === MIỀN TRUNG ===
+  hue: {
+    name: 'Thừa Thiên Huế',
+    bbox: [16.25, 107.45, 16.55, 107.75]
   },
   danang: {
     name: 'Đà Nẵng',
-    bbox: [15.9, 107.9, 16.2, 108.3]
+    bbox: [15.95, 108.05, 16.15, 108.35]
+  },
+  quangnam: {
+    name: 'Quảng Nam',
+    bbox: [15.4, 107.8, 15.95, 108.5]
+  },
+  quangngai: {
+    name: 'Quảng Ngãi',
+    bbox: [14.85, 108.65, 15.25, 109.1]
+  },
+  binhdinh: {
+    name: 'Bình Định',
+    bbox: [13.75, 108.7, 14.4, 109.3]
+  },
+  phuyen: {
+    name: 'Phú Yên',
+    bbox: [12.9, 109.0, 13.45, 109.45]
+  },
+  khanhhoa: {
+    name: 'Khánh Hòa (Nha Trang)',
+    bbox: [12.15, 108.95, 12.55, 109.35]
+  },
+  ninhthuan: {
+    name: 'Ninh Thuận',
+    bbox: [11.45, 108.7, 11.85, 109.2]
+  },
+  binhthuan: {
+    name: 'Bình Thuận',
+    bbox: [10.75, 107.65, 11.25, 108.4]
+  },
+
+  // === TÂY NGUYÊN ===
+  daklak: {
+    name: 'Đắk Lắk',
+    bbox: [12.35, 107.7, 13.05, 108.65]
+  },
+  lamdong: {
+    name: 'Lâm Đồng (Đà Lạt)',
+    bbox: [11.8, 108.15, 12.1, 108.6]
+  },
+
+  // === MIỀN NAM ===
+  hcm: {
+    name: 'TP. Hồ Chí Minh',
+    bbox: [10.65, 106.5, 10.95, 106.85]
+  },
+  binhduong: {
+    name: 'Bình Dương',
+    bbox: [10.85, 106.5, 11.25, 106.85]
+  },
+  dongnai: {
+    name: 'Đồng Nai',
+    bbox: [10.75, 106.75, 11.2, 107.35]
+  },
+  bariavungtau: {
+    name: 'Bà Rịa - Vũng Tàu',
+    bbox: [10.25, 107.0, 10.65, 107.45]
+  },
+  longan: {
+    name: 'Long An',
+    bbox: [10.45, 106.15, 10.9, 106.65]
+  },
+  tiengiang: {
+    name: 'Tiền Giang',
+    bbox: [10.2, 106.0, 10.55, 106.55]
+  },
+  bentre: {
+    name: 'Bến Tre',
+    bbox: [9.95, 106.25, 10.35, 106.75]
+  },
+  vinhlong: {
+    name: 'Vĩnh Long',
+    bbox: [10.0, 105.8, 10.35, 106.25]
+  },
+  cantho: {
+    name: 'Cần Thơ',
+    bbox: [9.95, 105.65, 10.15, 105.9]
+  },
+  angiang: {
+    name: 'An Giang',
+    bbox: [10.2, 104.85, 10.75, 105.55]
+  },
+  kiengiang: {
+    name: 'Kiên Giang',
+    bbox: [9.85, 104.45, 10.45, 105.35]
+  },
+  camau: {
+    name: 'Cà Mau',
+    bbox: [8.85, 104.75, 9.45, 105.35]
   }
 };
 

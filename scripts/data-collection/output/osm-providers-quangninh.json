@@ -1,0 +1,221 @@
+[
+  {
+    "osm_id": "6358083274",
+    "osm_type": "node",
+    "name": "Kia",
+    "name_en": null,
+    "description": null,
+    "category": "repair",
+    "osm_tags": [
+      "shop=car"
+    ],
+    "lat": 20.9572178,
+    "lng": 106.9565634,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": "Kia",
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "quangninh",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/6358083274",
+    "collected_at": "2026-04-21T04:22:05.875Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  },
+  {
+    "osm_id": "7168763373",
+    "osm_type": "node",
+    "name": "Toyota Quang Ninh",
+    "name_en": null,
+    "description": null,
+    "category": "repair",
+    "osm_tags": [
+      "shop=car"
+    ],
+    "lat": 20.9554663,
+    "lng": 106.9812258,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": "Toyota",
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "quangninh",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/7168763373",
+    "collected_at": "2026-04-21T04:22:05.875Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  },
+  {
+    "osm_id": "490697114",
+    "osm_type": "way",
+    "name": "Ford Quảng Ninh",
+    "name_en": null,
+    "description": null,
+    "category": "repair",
+    "osm_tags": [
+      "shop=car"
+    ],
+    "lat": 20.9694855,
+    "lng": 107.0830643,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": "Ford",
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "quangninh",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/way/490697114",
+    "collected_at": "2026-04-21T04:22:05.875Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  },
+  {
+    "osm_id": "4533658810",
+    "osm_type": "node",
+    "name": "Chưa có tên",
+    "name_en": null,
+    "description": null,
+    "category": "car_wash",
+    "osm_tags": [
+      "amenity=car_wash"
+    ],
+    "lat": 21.0237765,
+    "lng": 107.36664,
+    "address": "Số nhà 250, Lý Thường Kiệt",
+    "city": null,
+    "district": null,
+    "street": "Lý Thường Kiệt",
+    "housenumber": "Số nhà 250",
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": null,
+    "operator": null,
+    "working_hours": {
+      "mon": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "tue": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "wed": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "thu": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "fri": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "sat": {
+        "open": "08:00",
+        "close": "18:00"
+      },
+      "sun": {
+        "open": "08:00",
+        "close": "18:00"
+      }
+    },
+    "working_hours_raw": "Mo-Su 08:00-18:00",
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "quangninh",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/4533658810",
+    "collected_at": "2026-04-21T04:22:09.504Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  },
+  {
+    "osm_id": "6520653700",
+    "osm_type": "node",
+    "name": "Lốp Ôtô An Tâm",
+    "name_en": null,
+    "description": null,
+    "category": "car_parts",
+    "osm_tags": [
+      "shop=tyres"
+    ],
+    "lat": 21.0325699,
+    "lng": 106.7648622,
+    "address": null,
+    "city": null,
+    "district": null,
+    "street": null,
+    "housenumber": null,
+    "phone": null,
+    "email": null,
+    "website": null,
+    "facebook": null,
+    "brand": null,
+    "operator": null,
+    "working_hours": null,
+    "working_hours_raw": null,
+    "services": [],
+    "vehicle_types": [
+      "car",
+      "motorcycle"
+    ],
+    "region_code": "quangninh",
+    "data_source": "openstreetmap",
+    "osm_url": "https://www.openstreetmap.org/node/6520653700",
+    "collected_at": "2026-04-21T04:22:16.570Z",
+    "status": "pending",
+    "rating_avg": 0,
+    "rating_count": 0
+  }
+]
