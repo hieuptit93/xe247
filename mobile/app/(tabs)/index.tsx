@@ -17,20 +17,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { SearchBar } from '@/components/SearchBar';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { ProviderCard } from '@/components/ProviderCard';
+import { ProvincePickerModal } from '@/components/ProvincePickerModal';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useLocation } from '@/hooks/useLocation';
 import { useProviderStore } from '@/stores/provider.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { Spacing, FontSize, FontWeight, BorderRadius } from '@/constants/theme';
+import { Province, getProvinceByCode } from '@/constants/provinces';
 import { Provider } from '@/types/database';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Default locations for fallback
-const DEFAULT_LOCATIONS = {
-  hcm: { lat: 10.7769, lng: 106.7009, name: 'TP. Hồ Chí Minh' },
-  hanoi: { lat: 21.0285, lng: 105.8542, name: 'Hà Nội' },
-};
+const DEFAULT_PROVINCE = getProvinceByCode('hcm')!;
 
 type ViewMode = 'list' | 'map';
 
@@ -50,24 +48,24 @@ export default function HomeScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [usingFallback, setUsingFallback] = useState<string | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedMarker, setSelectedMarker] = useState<Provider | null>(null);
+  const [showProvincePicker, setShowProvincePicker] = useState(false);
 
   const [currentLocation, setCurrentLocation] = useState({
-    lat: DEFAULT_LOCATIONS.hcm.lat,
-    lng: DEFAULT_LOCATIONS.hcm.lng,
+    lat: DEFAULT_PROVINCE.lat,
+    lng: DEFAULT_PROVINCE.lng,
   });
 
-  const loadProviders = useCallback(async (fallbackCity?: string) => {
+  const loadProviders = useCallback(async (province?: Province) => {
     let searchLocation = location ? { lat: location.latitude, lng: location.longitude } : null;
-    let fallbackName: string | null = null;
+    let fallbackProvince: Province | null = null;
 
-    // If fallback city is specified, use it
-    if (fallbackCity && DEFAULT_LOCATIONS[fallbackCity as keyof typeof DEFAULT_LOCATIONS]) {
-      const fallback = DEFAULT_LOCATIONS[fallbackCity as keyof typeof DEFAULT_LOCATIONS];
-      searchLocation = { lat: fallback.lat, lng: fallback.lng };
-      fallbackName = fallback.name;
+    // If province is specified, use it
+    if (province) {
+      searchLocation = { lat: province.lat, lng: province.lng };
+      fallbackProvince = province;
     }
     // Check if location is outside Vietnam (roughly lat 8-24, lng 102-110)
     else if (searchLocation) {
@@ -77,14 +75,13 @@ export default function HomeScreen() {
 
       if (!isInVietnam) {
         console.log('Location outside Vietnam, using HCM as fallback');
-        const fallback = DEFAULT_LOCATIONS.hcm;
-        searchLocation = { lat: fallback.lat, lng: fallback.lng };
-        fallbackName = fallback.name;
+        searchLocation = { lat: DEFAULT_PROVINCE.lat, lng: DEFAULT_PROVINCE.lng };
+        fallbackProvince = DEFAULT_PROVINCE;
       }
     }
 
-    if (fallbackName) {
-      setUsingFallback(fallbackName);
+    if (fallbackProvince) {
+      setSelectedProvince(fallbackProvince);
     }
 
     if (searchLocation) {
@@ -102,6 +99,12 @@ export default function HomeScreen() {
     setRefreshing(true);
     await loadProviders();
     setRefreshing(false);
+  };
+
+  const handleProvinceSelect = (province: Province) => {
+    setShowProvincePicker(false);
+    setSelectedProvince(province);
+    loadProviders(province);
   };
 
   const handleCategorySelect = (category: string | null) => {
@@ -258,16 +261,16 @@ export default function HomeScreen() {
         <View style={styles.headerTop}>
           <View>
             <Text style={[styles.headerTitle, { color: colors.text }]}>XE 247</Text>
-            {usingFallback ? (
+            {selectedProvince ? (
               <View style={styles.locationRow}>
                 <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
                   Đang xem tại{' '}
                 </Text>
                 <TouchableOpacity
-                  onPress={() => loadProviders(usingFallback === 'TP. Hồ Chí Minh' ? 'hanoi' : 'hcm')}
+                  onPress={() => setShowProvincePicker(true)}
                 >
                   <Text style={[styles.locationLink, { color: colors.primary }]}>
-                    {usingFallback} ▾
+                    {selectedProvince.name} ▾
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -328,29 +331,21 @@ export default function HomeScreen() {
             Đang lấy vị trí của bạn...
           </Text>
         </View>
-      ) : locationError && !usingFallback ? (
+      ) : locationError && !selectedProvince ? (
         <View style={styles.centered}>
           <Text style={styles.errorIcon}>📍</Text>
           <Text style={[styles.errorTitle, { color: colors.text }]}>
             Không thể lấy vị trí
           </Text>
           <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-            Chọn thành phố để xem dịch vụ
+            Chọn tỉnh/thành phố để xem dịch vụ
           </Text>
-          <View style={styles.fallbackButtons}>
-            <TouchableOpacity
-              style={[styles.fallbackButton, { backgroundColor: colors.primary }]}
-              onPress={() => loadProviders('hcm')}
-            >
-              <Text style={styles.fallbackButtonText}>TP. Hồ Chí Minh</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.fallbackButton, { backgroundColor: colors.text }]}
-              onPress={() => loadProviders('hanoi')}
-            >
-              <Text style={styles.fallbackButtonText}>Hà Nội</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[styles.fallbackButton, { backgroundColor: colors.primary, marginTop: Spacing.xl }]}
+            onPress={() => setShowProvincePicker(true)}
+          >
+            <Text style={styles.fallbackButtonText}>Chọn tỉnh/thành phố</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={refreshLocation}
@@ -365,6 +360,14 @@ export default function HomeScreen() {
       ) : (
         renderListView()
       )}
+
+      {/* Province Picker Modal */}
+      <ProvincePickerModal
+        visible={showProvincePicker}
+        selectedCode={selectedProvince?.code ?? null}
+        onSelect={handleProvinceSelect}
+        onClose={() => setShowProvincePicker(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -452,11 +455,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
     textAlign: 'center',
     lineHeight: 20,
-  },
-  fallbackButtons: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-    marginTop: Spacing.xl,
   },
   fallbackButton: {
     paddingVertical: Spacing.md,
