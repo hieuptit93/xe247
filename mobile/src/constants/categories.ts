@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 export type CategoryKey =
   | 'repair'
+  | 'service'
+  | 'tuning'
   | 'car_wash'
-  | 'car_parts'
+  | 'rescue'
   | 'ev_charging';
 
 export interface Category {
@@ -14,7 +16,7 @@ export interface Category {
   color: string;
 }
 
-// Categories matching Supabase data
+// Categories for home screen (excluding EV charging which has its own tab)
 export const CATEGORIES: Category[] = [
   {
     key: 'repair',
@@ -24,30 +26,49 @@ export const CATEGORIES: Category[] = [
     color: '#ff385c', // Rausch Red
   },
   {
+    key: 'service',
+    name: 'Service',
+    nameVi: 'Xưởng dịch vụ',
+    icon: 'car-sport',
+    color: '#00a699',
+  },
+  {
+    key: 'tuning',
+    name: 'Tuning',
+    nameVi: 'Độ xe',
+    icon: 'speedometer',
+    color: '#fc642d',
+  },
+  {
     key: 'car_wash',
     name: 'Car Wash',
     nameVi: 'Rửa xe',
     icon: 'water',
-    color: '#00a699',
+    color: '#428bff',
   },
   {
-    key: 'car_parts',
-    name: 'Parts',
-    nameVi: 'Phụ tùng',
-    icon: 'cog',
-    color: '#fc642d',
-  },
-  {
-    key: 'ev_charging',
-    name: 'EV Charging',
-    nameVi: 'Sạc EV',
-    icon: 'flash',
-    color: '#00d1b2',
+    key: 'rescue',
+    name: 'Rescue',
+    nameVi: 'Cứu hộ',
+    icon: 'warning',
+    color: '#e00b41',
   },
 ];
 
+// EV Charging (separate tab)
+export const EV_CHARGING_CATEGORY: Category = {
+  key: 'ev_charging',
+  name: 'EV Charging',
+  nameVi: 'Sạc EV',
+  icon: 'flash',
+  color: '#00d1b2',
+};
+
+// All categories including EV
+export const ALL_CATEGORIES: Category[] = [...CATEGORIES, EV_CHARGING_CATEGORY];
+
 export const getCategoryByKey = (key: string): Category | undefined => {
-  return CATEGORIES.find((c) => c.key === key);
+  return ALL_CATEGORIES.find((c) => c.key === key);
 };
 
 export const getCategoryColor = (key: string): string => {

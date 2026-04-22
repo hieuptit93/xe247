@@ -50,58 +50,88 @@ module.exports = {
     }
   },
 
-  // Service categories to search
+  // Service categories to search (matching mobile app)
   categories: [
     {
       id: 'repair',
       name: 'Sửa chữa',
+      nameEn: 'Repair',
+      icon: 'construct',
+      color: '#ff385c',
       googleTypes: ['car_repair'],
-      keywords: ['sửa xe', 'garage', 'sửa chữa ô tô', 'sửa xe máy'],
-      icon: '🔧'
+      osmTags: ['shop=car_repair', 'amenity=car_repair', 'shop=motorcycle_repair'],
+      keywords: ['sửa xe', 'garage', 'sửa chữa ô tô', 'sửa xe máy', 'gara', 'tiệm sửa xe'],
     },
     {
-      id: 'carwash',
-      name: 'Rửa xe',
-      googleTypes: ['car_wash'],
-      keywords: ['rửa xe', 'car wash', 'chăm sóc xe'],
-      icon: '🚿'
+      id: 'service',
+      name: 'Xưởng dịch vụ',
+      nameEn: 'Service Workshop',
+      icon: 'car-sport',
+      color: '#00a699',
+      googleTypes: ['car_repair', 'car_dealer'],
+      osmTags: ['shop=car', 'shop=car_parts', 'amenity=vehicle_inspection'],
+      keywords: ['xưởng dịch vụ', 'bảo dưỡng', 'thay nhớt', 'bảo dưỡng định kỳ', 'đại lý', 'showroom'],
     },
     {
-      id: 'maintenance',
-      name: 'Bảo dưỡng',
-      googleTypes: ['car_repair'],
-      keywords: ['bảo dưỡng', 'thay nhớt', 'bảo dưỡng định kỳ'],
-      icon: '⚙️'
-    },
-    {
-      id: 'tires',
-      name: 'Lốp xe',
-      googleTypes: [],
-      keywords: ['lốp xe', 'vỏ xe', 'vá lốp', 'thay lốp'],
-      icon: '🛞'
-    },
-    {
-      id: 'customization',
+      id: 'tuning',
       name: 'Độ xe',
+      nameEn: 'Car Tuning',
+      icon: 'speedometer',
+      color: '#fc642d',
       googleTypes: [],
-      keywords: ['độ xe', 'wrap xe', 'dán phim', 'phụ kiện ô tô'],
-      icon: '🏎️'
+      osmTags: ['shop=car_parts'],
+      keywords: ['độ xe', 'wrap xe', 'dán phim', 'phụ kiện ô tô', 'nâng cấp xe', 'body kit', 'đồ chơi xe'],
+    },
+    {
+      id: 'car_wash',
+      name: 'Rửa xe',
+      nameEn: 'Car Wash',
+      icon: 'water',
+      color: '#428bff',
+      googleTypes: ['car_wash'],
+      osmTags: ['amenity=car_wash'],
+      keywords: ['rửa xe', 'car wash', 'chăm sóc xe', 'detailing', 'nội thất xe'],
     },
     {
       id: 'rescue',
       name: 'Cứu hộ',
+      nameEn: 'Rescue',
+      icon: 'warning',
+      color: '#e00b41',
       googleTypes: [],
-      keywords: ['cứu hộ xe', 'kéo xe', 'cứu hộ giao thông'],
-      icon: '🆘'
+      osmTags: [],
+      keywords: ['cứu hộ xe', 'kéo xe', 'cứu hộ giao thông', 'xe cứu hộ', 'dịch vụ cứu hộ', 'hỗ trợ đường bộ'],
     },
     {
-      id: 'painting',
-      name: 'Đồng sơn',
-      googleTypes: [],
-      keywords: ['đồng sơn', 'sơn xe', 'gò hàn'],
-      icon: '🎨'
-    }
+      id: 'ev_charging',
+      name: 'Sạc EV',
+      nameEn: 'EV Charging',
+      icon: 'flash',
+      color: '#00d1b2',
+      googleTypes: ['electric_vehicle_charging_station'],
+      osmTags: ['amenity=charging_station'],
+      keywords: ['trạm sạc', 'sạc điện', 'ev charging', 'vinfast', 'sạc xe điện'],
+    },
   ],
+
+  // Category mapping for data normalization
+  categoryMapping: {
+    // Old category -> New category
+    'car_repair': 'repair',
+    'motorcycle_repair': 'repair',
+    'car_parts': 'service',
+    'parts': 'service',
+    'maintenance': 'service',
+    'car_wash': 'car_wash',
+    'wash': 'car_wash',
+    'customization': 'tuning',
+    'painting': 'tuning',
+    'tires': 'service',
+    'charging': 'ev_charging',
+    'ev': 'ev_charging',
+    'towing': 'rescue',
+    'roadside': 'rescue',
+  },
 
   // Search radius in meters
   searchRadius: 3000, // 3km per district center
@@ -117,5 +147,11 @@ module.exports = {
     minRating: 0, // Include all ratings
     minReviews: 0, // Include all
     excludeChains: false
+  },
+
+  // Output configuration
+  output: {
+    directory: './output',
+    format: 'json',
   }
 };

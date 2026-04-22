@@ -104,14 +104,6 @@ export default function ProfileScreen() {
           >
             <Text style={styles.loginButtonText}>Đăng nhập</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.registerButton, { borderColor: colors.text }]}
-            onPress={handleLogin}
-          >
-            <Text style={[styles.registerButtonText, { color: colors.text }]}>
-              Tạo tài khoản mới
-            </Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );

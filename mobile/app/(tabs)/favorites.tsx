@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xxxl,
+    paddingBottom: 120, // Space for floating tab bar
   },
   listHeader: {
     paddingHorizontal: Spacing.lg,
