@@ -2,8 +2,8 @@
 
 > React Native app cho XE 247 - Tìm dịch vụ xe gần bạn
 > 
-> **PRD Version:** 2.0 (Unified App)  
-> **Last Updated:** 2026-04-22
+> **PRD Version:** 2.1 (Unified App + UGC)  
+> **Last Updated:** 2026-04-23
 
 ## Tech Stack
 
@@ -43,7 +43,15 @@ mobile/
 │   ├── (auth)/            # Auth screens
 │   │   └── login.tsx      # Google OAuth login
 │   ├── provider/          # Provider screens
-│   │   └── [id].tsx       # Provider detail
+│   │   ├── [id].tsx       # Provider detail
+│   │   ├── reviews.tsx    # Reviews list (C06)
+│   │   ├── gallery.tsx    # Fullscreen gallery (C05)
+│   │   ├── rate.tsx       # Rating form (C12)
+│   │   ├── rate-success.tsx # Rating confirmation (C13)
+│   │   └── report.tsx     # Report provider (C18)
+│   ├── station/           # EV Station screens
+│   │   └── [id].tsx       # Station detail (C08)
+│   ├── recent.tsx         # Recently viewed (C16)
 │   └── _layout.tsx        # Root layout
 ├── src/
 │   ├── components/        # Reusable components
@@ -56,7 +64,8 @@ mobile/
 │   ├── stores/           # Zustand stores
 │   │   ├── auth.store.ts
 │   │   ├── provider.store.ts
-│   │   └── favorites.store.ts
+│   │   ├── favorites.store.ts
+│   │   └── recent.store.ts    # Recently viewed
 │   ├── hooks/            # Custom hooks
 │   │   ├── useLocation.ts
 │   │   └── useColorScheme.ts
@@ -95,13 +104,17 @@ mobile/
 - [x] Search text filter
 
 #### F-C03: Xem Profile Provider
-- [x] Image gallery với pagination
+- [x] Image gallery với pagination (tap để fullscreen)
 - [x] Thông tin cơ bản (tên, địa chỉ, điện thoại)
 - [x] Bản đồ với marker
 - [x] Nút "Gọi ngay" và "Zalo"
 - [x] Nút chỉ đường (Google Maps/Apple Maps)
 - [x] Nút share và favorite
 - [x] Hiển thị dịch vụ (nếu có)
+- [x] Link đến Reviews list
+- [x] Nút viết đánh giá
+- [x] Nút báo cáo sai thông tin
+- [x] Auto-track recently viewed
 
 #### F-C08: Trạm Sạc Xe Điện
 - [x] **Tab riêng cho EV Charging** (tách khỏi Home)
@@ -110,6 +123,12 @@ mobile/
 - [x] Station cards với status badges
 - [x] EV Green accent color (#00d1b2)
 - [x] Khoảng cách và số cổng hiển thị
+- [x] **Station Detail screen** với:
+  - Charging ports status (Rảnh/Đang sạc/Bảo trì)
+  - Port types (CCS2, Type 2) và công suất
+  - Giá sạc (VND/kWh)
+  - Tiện ích (Parking, Cafe, WC, WiFi)
+  - Nút chỉ đường đến trạm
 
 #### Favorites (P1 - Done early)
 - [x] Danh sách providers đã lưu
@@ -127,6 +146,7 @@ mobile/
 #### Profile Screen
 - [x] Hiển thị thông tin user (từ Google)
 - [x] Banner "Tạo tài khoản" cho guest
+- [x] **Đã xem gần đây** - link đến Recently Viewed
 - [x] Menu cài đặt, hỗ trợ, pháp lý
 - [x] Đăng xuất
 - [x] Role switcher (Consumer ↔ Provider)
@@ -182,6 +202,7 @@ mobile/
 #### P1 - Should Have
 | Feature | PRD ID | Notes |
 |---------|--------|-------|
+| **🆕 User đóng góp địa điểm (UGC)** | **F-C09** | **One-tap add, OCR, GPS verify, gamification** |
 | Real-time tracking (WebSocket) | F-C05 | Polling trước, WebSocket sau |
 | Payment online (Momo/VNPay) | F-C06 | Sau COD |
 | Push notification | - | Expo Notifications |
@@ -201,29 +222,50 @@ mobile/
 
 ---
 
-### 📊 Progress Summary
+### 📊 Progress Summary (PRD v2.1)
 
 | Category | Done | Total | % |
 |----------|------|-------|---|
-| Consumer Screens (PRD) | 18 | 18 | 100% |
+| Consumer Screens (PRD v2.0) | 18 | 18 | 100% |
+| **UGC Screens (PRD v2.1)** | **0** | **5** | **0%** |
 | Provider Screens (PRD) | 2 | 12 | 17% |
 | Admin Screens (PRD) | 0 | 6 | 0% |
-| **Overall** | **20** | **36** | **56%** |
+| **Overall** | **20** | **41** | **49%** |
 
-**Consumer screens completed (2026-04-22):**
-- C05: Provider Gallery (fullscreen zoom, pinch-to-zoom)
-- C06: Provider Reviews (list, stats, distribution chart)
-- C08: EV Station Detail (ports, amenities, map)
-- C12: Rating Screen (stars, quick tags, comment)
-- C13: Rating Success (animated confirmation)
-- C16: Recently Viewed (with timestamp)
-- C18: Report Provider (6 report types)
+**UGC Screens cần triển khai (F-C09):**
+| Screen | File | Features |
+|--------|------|----------|
+| C19 Add Camera | `contribute/camera.tsx` | Chụp biển hiệu, OCR auto-fill |
+| C20 Add Confirm | `contribute/confirm.tsx` | Xác nhận info, chọn category |
+| C21 Success | `contribute/success.tsx` | Celebration, điểm, badge |
+| C22 My Contributions | `contribute/index.tsx` | Danh sách đã đóng góp |
+| C23 Leaderboard | `contribute/leaderboard.tsx` | Bảng xếp hạng (Phase 2) |
 
-**Next priorities (theo PRD roadmap):**
+**Consumer screens completed (2026-04-22 → 2026-04-23):**
+
+| Screen | File | Features |
+|--------|------|----------|
+| C05 Gallery | `provider/gallery.tsx` | Fullscreen, swipe, thumbnails |
+| C06 Reviews | `provider/reviews.tsx` | Stats, distribution chart, review cards |
+| C08 EV Detail | `station/[id].tsx` | Ports status, amenities, directions |
+| C12 Rating | `provider/rate.tsx` | 5-star, quick tags, comment |
+| C13 Success | `provider/rate-success.tsx` | Animated confirmation |
+| C16 Recent | `recent.tsx` | History with timestamps |
+| C18 Report | `provider/report.tsx` | 6 report types |
+
+**Next priorities (theo PRD v2.1 roadmap):**
+
+**Sprint tiếp theo - UGC Feature (F-C09):**
+1. ✨ One-Tap Add Location flow (FAB → Camera → OCR → Confirm)
+2. 🔍 Google Vision OCR integration (auto-fill tên, SĐT)
+3. 📍 GPS verification (100m proximity check)
+4. 🏅 Contributor profile + tier system (Bronze→Diamond)
+5. 🎉 "Discovered by @username" badge
+
+**Sau UGC - Provider Mode:**
 1. Provider registration flow (F-P01)
 2. Service management (F-P02)
 3. Provider dashboard (F-P04)
-4. Basic booking flow (F-C04) - đơn giản hóa cho MVP
 
 ---
 

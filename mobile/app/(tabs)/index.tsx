@@ -365,6 +365,15 @@ export default function HomeScreen() {
       ) : (
         renderListView()
       )}
+
+      {/* FAB - Add Location */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+        onPress={() => router.push('/contribute/camera')}
+        activeOpacity={0.9}
+      >
+        <Ionicons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -569,5 +578,20 @@ const styles = StyleSheet.create({
   mapCountText: {
     fontSize: FontSize.small,
     fontWeight: FontWeight.semibold,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    right: Spacing.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

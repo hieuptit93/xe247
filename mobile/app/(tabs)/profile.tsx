@@ -201,6 +201,12 @@ export default function ProfileScreen() {
               title="Đã xem gần đây"
               onPress={() => router.push('/recent')}
             />
+            <MenuItem
+              icon="add-circle-outline"
+              title="Đóng góp của tôi"
+              subtitle="Thêm địa điểm, nhận điểm thưởng"
+              onPress={() => router.push('/contribute')}
+            />
           </View>
         </View>
 

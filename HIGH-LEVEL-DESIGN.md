@@ -1,7 +1,7 @@
 # XE 247 - High-Level Design Document (HLD)
 
-> **Version:** 1.0  
-> **Last Updated:** 2026-04-20  
+> **Version:** 1.1  
+> **Last Updated:** 2026-04-23  
 > **Author:** Dương Quá - Tech Lead  
 > **Status:** Draft  
 > **Document Type:** Technical Architecture Specification
@@ -907,6 +907,146 @@ CREATE TABLE reports (
 );
 
 -- =============================================================================
+-- USER-GENERATED CONTENT (UGC) TABLES - Added v1.1
+-- =============================================================================
+
+-- Contributor profiles (extends users)
+CREATE TABLE contributor_profiles (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id         UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    
+    -- Points & Tier
+    total_points    INT DEFAULT 0,
+    tier            VARCHAR(20) DEFAULT 'bronze', -- bronze, silver, gold, diamond
+    
+    -- Stats
+    locations_added INT DEFAULT 0,
+    locations_updated INT DEFAULT 0,
+    photos_uploaded INT DEFAULT 0,
+    reports_submitted INT DEFAULT 0,
+    total_views     INT DEFAULT 0,  -- Views on contributed locations
+    
+    -- Badges (JSON array of badge IDs)
+    badges          JSONB DEFAULT '[]',
+    
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- Contributions (pending submissions)
+CREATE TABLE contributions (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id         UUID NOT NULL REFERENCES users(id),
+    
+    -- Contribution type
+    type            VARCHAR(30) NOT NULL, -- 'new_location', 'update_info', 'add_photo', 'report_closed'
+    
+    -- Location data (for new_location type)
+    name            VARCHAR(200),
+    phone           VARCHAR(20),
+    address         TEXT,
+    location        GEOGRAPHY(POINT, 4326),
+    category_id     UUID REFERENCES categories(id),
+    
+    -- Images
+    images          TEXT[],
+    
+    -- For updates to existing providers
+    provider_id     UUID REFERENCES providers(id),
+    update_field    VARCHAR(50),  -- 'phone', 'hours', 'address', etc.
+    old_value       TEXT,
+    new_value       TEXT,
+    
+    -- Verification data
+    user_location   GEOGRAPHY(POINT, 4326), -- User GPS when submitted
+    distance_meters DECIMAL(10,2),          -- Distance from claimed location
+    ocr_confidence  DECIMAL(3,2),           -- OCR confidence score 0-1
+    photo_verified  BOOLEAN DEFAULT false,  -- AI photo verification passed
+    
+    -- Points
+    points_earned   INT DEFAULT 0,
+    
+    -- Status
+    status          VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected, merged
+    rejection_reason TEXT,
+    reviewed_by     UUID REFERENCES users(id),
+    reviewed_at     TIMESTAMP,
+    
+    -- If approved, link to created/updated provider
+    result_provider_id UUID REFERENCES providers(id),
+    
+    created_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- Contribution badges
+CREATE TABLE badges (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug            VARCHAR(50) UNIQUE NOT NULL,
+    name            VARCHAR(100) NOT NULL,
+    description     TEXT,
+    icon            VARCHAR(10),  -- Emoji
+    criteria        JSONB,        -- {"type": "locations_added", "count": 10}
+    points_required INT,
+    tier_required   VARCHAR(20),
+    
+    created_at      TIMESTAMP DEFAULT NOW()
+);
+
+-- Seed default badges
+INSERT INTO badges (slug, name, description, icon, criteria) VALUES
+    ('explorer', 'Người khám phá', 'Thêm địa điểm đầu tiên', '🔍', '{"type": "locations_added", "count": 1}'),
+    ('photographer', 'Nhiếp ảnh gia', 'Upload 10 ảnh', '📸', '{"type": "photos_uploaded", "count": 10}'),
+    ('local_expert', 'Chuyên gia địa phương', 'Thêm 20 địa điểm trong 1 quận', '🗺️', '{"type": "locations_in_district", "count": 20}'),
+    ('quality_hunter', 'Thợ săn chất lượng', '10 contributions được approved', '✅', '{"type": "approved_contributions", "count": 10}'),
+    ('data_cleaner', 'Người dọn dẹp', 'Báo cáo 5 tiệm đã đóng cửa chính xác', '🧹', '{"type": "accurate_closures", "count": 5}'),
+    ('rising_star', 'Ngôi sao đang lên', 'Đạt hạng Bạc', '⭐', '{"type": "tier", "value": "silver"}'),
+    ('contributor_gold', 'Cống hiến vàng', 'Đạt hạng Vàng', '🥇', '{"type": "tier", "value": "gold"}'),
+    ('legend', 'Huyền thoại', 'Đạt hạng Kim Cương', '💎', '{"type": "tier", "value": "diamond"}');
+
+-- Track "Discovered by" on providers
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS
+    discovered_by UUID REFERENCES users(id);
+ALTER TABLE providers ADD COLUMN IF NOT EXISTS
+    discovered_at TIMESTAMP;
+
+-- UGC-specific indexes
+CREATE INDEX idx_contributions_user_id ON contributions(user_id);
+CREATE INDEX idx_contributions_status ON contributions(status);
+CREATE INDEX idx_contributions_created_at ON contributions(created_at DESC);
+CREATE INDEX idx_contributions_location ON contributions USING GIST(location);
+CREATE INDEX idx_contributor_profiles_user_id ON contributor_profiles(user_id);
+CREATE INDEX idx_contributor_profiles_tier ON contributor_profiles(tier);
+CREATE INDEX idx_contributor_profiles_points ON contributor_profiles(total_points DESC);
+
+-- Trigger to update contributor stats
+CREATE OR REPLACE FUNCTION update_contributor_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'approved' AND OLD.status = 'pending' THEN
+        UPDATE contributor_profiles SET
+            total_points = total_points + NEW.points_earned,
+            locations_added = CASE WHEN NEW.type = 'new_location' THEN locations_added + 1 ELSE locations_added END,
+            locations_updated = CASE WHEN NEW.type = 'update_info' THEN locations_updated + 1 ELSE locations_updated END,
+            photos_uploaded = CASE WHEN NEW.type = 'add_photo' THEN photos_uploaded + 1 ELSE photos_uploaded END,
+            reports_submitted = CASE WHEN NEW.type = 'report_closed' THEN reports_submitted + 1 ELSE reports_submitted END,
+            tier = CASE 
+                WHEN total_points + NEW.points_earned >= 1000 THEN 'diamond'
+                WHEN total_points + NEW.points_earned >= 300 THEN 'gold'
+                WHEN total_points + NEW.points_earned >= 100 THEN 'silver'
+                ELSE 'bronze'
+            END,
+            updated_at = NOW()
+        WHERE user_id = NEW.user_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_contributor_after_approval
+    AFTER UPDATE ON contributions
+    FOR EACH ROW EXECUTE FUNCTION update_contributor_stats();
+
+-- =============================================================================
 -- INDEXES
 -- =============================================================================
 
@@ -1691,6 +1831,7 @@ Response 201 Created:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-20 | Dương Quá (Tech Lead) | Initial HLD with unified app architecture |
+| **1.1** | **2026-04-23** | **Dương Quá + Team** | **UGC Feature**: Thêm database schema cho contributions, contributor_profiles, badges. Thêm triggers cập nhật stats. Thêm discovered_by column cho providers. |
 
 ---
 

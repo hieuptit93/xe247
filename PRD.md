@@ -1,7 +1,7 @@
 # XE 247 - Product Requirements Document (PRD)
 
-> **Version:** 2.0 (Unified App)  
-> **Last Updated:** 2026-04-20  
+> **Version:** 2.1 (Unified App + UGC)  
+> **Last Updated:** 2026-04-23  
 > **Author:** Team Kim Dung (Hoàng Dung - PO)  
 > **Status:** Final Draft  
 > **Related:** [HIGH-LEVEL-DESIGN.md](./HIGH-LEVEL-DESIGN.md)
@@ -610,6 +610,178 @@ So that tôi có thể sạc xe khi cần
 - Real-time status: Integrate API từ VinFast, EVN nếu có, hoặc crowdsource
 - Background location để suggest trạm khi pin xe thấp (với permission)
 - Offline cache trạm sạc cho khu vực hay đi
+
+---
+
+### F-C09: Đóng góp địa điểm (User-Generated Content)
+
+**Priority:** P1 (Should Have) - Feature mới thêm v2.1
+
+**User Story:**
+```
+As a người dùng đã sử dụng dịch vụ tại một tiệm hay
+I want đóng góp địa điểm đó lên app
+So that cộng đồng cũng có thể tìm thấy và sử dụng
+```
+
+**Problem Statement:**
+- Database hiện có ~1,500 providers nhưng ngoài đời có hàng chục ngàn tiệm
+- Không đủ nhân lực đi khảo sát từng tiệm
+- Giải pháp: Crowdsource - để cộng đồng tự đóng góp
+
+**Acceptance Criteria:**
+
+**AC1: One-Tap Contribution Flow**
+- [ ] FAB button "+" hiển thị trên map view
+- [ ] Tap "+" → Mở camera để chụp biển hiệu
+- [ ] OCR auto-fill tên tiệm và SĐT từ ảnh (Google Vision API)
+- [ ] GPS auto-fill vị trí hiện tại
+- [ ] User confirm thông tin → Submit
+- [ ] Tổng thời gian < 30 giây
+
+**AC2: GPS Verification**
+- [ ] Chỉ cho phép add location khi user ở trong bán kính 100m
+- [ ] Hiển thị message nếu user ở xa: "Bạn cần đến gần địa điểm để thêm"
+
+**AC3: Photo AI Verification**
+- [ ] AI check ảnh có phải biển hiệu thật (outdoor, có text, không phải stock)
+- [ ] Reject nếu ảnh không hợp lệ với hướng dẫn rõ ràng
+
+**AC4: Duplicate Detection**
+- [ ] Fuzzy match tên + địa chỉ với database (>80% similarity)
+- [ ] Nếu trùng → "Địa điểm này đã có. Bạn muốn cập nhật thông tin?"
+
+**AC5: Contribution Types**
+- [ ] Thêm địa điểm mới (có ảnh): +15 điểm
+- [ ] Thêm địa điểm mới (không ảnh): +5 điểm
+- [ ] Upload thêm ảnh cho địa điểm có sẵn: +3 điểm
+- [ ] Cập nhật thông tin (SĐT, giờ mở cửa): +5 điểm
+- [ ] Báo cáo tiệm đã đóng cửa: +8 điểm
+- [ ] Bị reject (spam/fake): -20 điểm
+
+**AC6: Recognition System - "Discovered by"**
+- [ ] Người add đầu tiên được gắn badge vĩnh viễn "Discovered by @username"
+- [ ] Badge hiển thị trên provider profile cho tất cả users thấy
+- [ ] Không thể thay đổi sau khi đã gắn
+
+**AC7: Tier System**
+- [ ] 🥉 Đồng (0-99 điểm): Badge "Người đóng góp"
+- [ ] 🥈 Bạc (100-299 điểm): + Verified badge, ưu tiên support
+- [ ] 🥇 Vàng (300-999 điểm): + Early access features mới
+- [ ] 💎 Kim Cương (1000+ điểm): + Mời bạn bè, VIP events, quà tặng
+
+**AC8: Progress & Gamification**
+- [ ] Progress ring trên profile hiển thị tiến độ đến level tiếp theo
+- [ ] Animation celebration khi level up
+- [ ] Badges collection hiển thị trên profile
+
+**AC9: Impact Visibility**
+- [ ] Popup khi mở app: "X người đã xem các địa điểm bạn thêm tuần này"
+- [ ] Thống kê trên profile: Địa điểm đã thêm, Thông tin đã sửa, Lượt xem
+
+**AC10: Moderation**
+- [ ] Contributions mới vào pending 24h (MVP: manual review)
+- [ ] Phase 2: Community vote từ trusted contributors (Vàng+)
+- [ ] Random audit 5% contributions mỗi tuần
+
+**UI/UX Notes:**
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ADD LOCATION FLOW (30 seconds)                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Step 1: Tap FAB "+"                                                    │
+│  ─────────────────────                                                  │
+│  ┌──────────────────────────────┐                                       │
+│  │     🗺️ Map View              │                                       │
+│  │                              │                                       │
+│  │         📍 📍               │                                       │
+│  │              📍              │                                       │
+│  │                        ┌───┐ │                                       │
+│  │                        │ + │ │  ← FAB button                        │
+│  │                        └───┘ │                                       │
+│  └──────────────────────────────┘                                       │
+│                                                                          │
+│  Step 2: Camera + OCR                                                   │
+│  ─────────────────────                                                  │
+│  ┌──────────────────────────────┐                                       │
+│  │  📷 Chụp biển hiệu           │                                       │
+│  │  ┌────────────────────────┐ │                                       │
+│  │  │   RỬA XE HOÀNG ANH    │ │                                       │
+│  │  │      0909.123.456      │ │                                       │
+│  │  └────────────────────────┘ │                                       │
+│  │         [ 📸 Chụp ]         │                                       │
+│  └──────────────────────────────┘                                       │
+│                                                                          │
+│  Step 3: Confirm (Auto-filled)                                          │
+│  ──────────────────────────────                                         │
+│  ┌──────────────────────────────┐                                       │
+│  │  ✏️ Thêm địa điểm            │                                       │
+│  │                              │                                       │
+│  │  Tên: [Rửa Xe Hoàng Anh ✓] │  ← OCR auto-fill                      │
+│  │  SĐT: [0909 123 456 ✓]     │  ← OCR auto-fill                      │
+│  │  Vị trí: [📍 123 ABC... ✓] │  ← GPS auto-fill                      │
+│  │  Loại: [🚿 Rửa xe]         │  ← 1 tap select                       │
+│  │                              │                                       │
+│  │     [ Thêm địa điểm 🎉 ]    │                                       │
+│  └──────────────────────────────┘                                       │
+│                                                                          │
+│  Step 4: Celebration                                                    │
+│  ───────────────────                                                    │
+│  ┌──────────────────────────────┐                                       │
+│  │      🎊 Confetti 🎊          │                                       │
+│  │    ┌──────────────────┐     │                                       │
+│  │    │  🏅 +15 điểm     │     │                                       │
+│  │    │  Badge: "Người   │     │                                       │
+│  │    │  khám phá"       │     │                                       │
+│  │    └──────────────────┘     │                                       │
+│  │  ████████░░░░ 65/100        │  ← Progress to next level             │
+│  │       [ Tuyệt vời! ]        │                                       │
+│  └──────────────────────────────┘                                       │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Profile Contributor Stats:**
+```
+┌──────────────────────────────┐
+│      👤 Minh Nguyễn          │
+│   ┌─────────────────────┐   │
+│   │    🥉 HẠNG ĐỒNG     │   │
+│   │   ████████░░░░░░    │   │
+│   │      65/100         │   │
+│   └─────────────────────┘   │
+│                              │
+│  📊 Đóng góp của bạn         │
+│  ─────────────────────────   │
+│  🏪 Địa điểm đã thêm:    12  │
+│  ✏️ Thông tin đã sửa:     8  │
+│  📸 Ảnh đã upload:       24  │
+│  👀 Lượt xem từ bạn:  1,247  │
+│                              │
+│  🏅 Badges                    │
+│  ┌────┐ ┌────┐ ┌────┐       │
+│  │ 🔍 │ │ 📸 │ │ 🗺️ │       │
+│  │Khám│ │Ảnh │ │Q.1 │       │
+│  │phá │ │đẹp │ │Pro │       │
+│  └────┘ └────┘ └────┘       │
+└──────────────────────────────┘
+```
+
+**Technical Notes:**
+- Google Vision API cho OCR (extract text từ ảnh biển hiệu)
+- PostGIS cho GPS proximity check (ST_DWithin)
+- Fuzzy matching với pg_trgm extension cho duplicate detection
+- Contribution submissions vào `contributions` table với status pending
+- Background job verify và merge vào `providers` table sau khi approved
+
+**Motivation Research (Team Kim Dung Brainstorm):**
+- Recognition > Money cho VN users: "Discovered by @username" có giá trị tâm lý lớn
+- Progress system (levels, badges) tạo habit quay lại
+- Impact visibility ("X người đã xem") tạo cảm giác đóng góp có ý nghĩa
+- Competition (leaderboards) sẽ thêm Phase 2 để tạo viral effect
+
+---
 
 **Data Model - Charging Stations:**
 ```sql
@@ -1289,7 +1461,7 @@ saved_providers (
 
 ### 5.4 Unified App Screen Inventory
 
-> **Total: 38 screens** (giảm từ 61 screens khi làm 2 apps riêng)
+> **Total: 43 screens** (38 screens v2.0 + 5 screens UGC v2.1)
 
 #### Shared Screens (5 screens)
 
@@ -1301,7 +1473,7 @@ saved_providers (
 | S04 | OTP Input | Nhập mã xác thực |
 | S05 | Mode Selector | Chọn Consumer/Provider mode |
 
-#### Consumer Mode Screens (18 screens)
+#### Consumer Mode Screens (23 screens) - Updated v2.1
 
 | # | Screen | Mô tả |
 |---|--------|-------|
@@ -1318,11 +1490,16 @@ saved_providers (
 | C11 | Search Results | Kết quả tìm kiếm |
 | C12 | Rating Screen | Đánh giá sau liên hệ |
 | C13 | Rating Success | Xác nhận đã đánh giá |
-| C14 | Consumer Profile | Thông tin cá nhân |
+| C14 | Consumer Profile | Thông tin cá nhân + Contributor Stats |
 | C15 | Favorites | Danh sách yêu thích |
 | C16 | Recently Viewed | Đã xem gần đây |
 | C17 | Settings | Cài đặt app |
 | C18 | Report Provider | Báo cáo sai thông tin |
+| **C19** | **Add Location Camera** | **Chụp ảnh biển hiệu (OCR)** |
+| **C20** | **Add Location Confirm** | **Xác nhận thông tin địa điểm** |
+| **C21** | **Contribution Success** | **Celebration + điểm + badge** |
+| **C22** | **My Contributions** | **Danh sách địa điểm đã đóng góp** |
+| **C23** | **Contributor Leaderboard** | **Bảng xếp hạng (Phase 2)** |
 
 #### Provider Mode Screens (12 screens)
 
@@ -1608,7 +1785,8 @@ SOLUTION:
 |---------|------|--------|---------|
 | 1.0 | 2026-04-10 | Hoàng Dung | Initial draft - Lốp 247 |
 | 1.1 | 2026-04-10 | Hoàng Dung | Mở rộng thành Xe 247 - đa dịch vụ |
-| **2.0** | **2026-04-20** | **Hoàng Dung + Dương Quá** | **Unified App Architecture** - Gộp Consumer + Provider thành 1 app với mode switching. Thêm HLD document. Giảm 38% screens, 35% effort. |
+| 2.0 | 2026-04-20 | Hoàng Dung + Dương Quá | Unified App Architecture - Gộp Consumer + Provider thành 1 app với mode switching. Thêm HLD document. Giảm 38% screens, 35% effort. |
+| **2.1** | **2026-04-23** | **Team Kim Dung (Hoa Sơn Luận Kiếm)** | **Thêm F-C09: UGC Feature** - User đóng góp địa điểm với OCR, GPS verification, gamification (tiers, badges, leaderboards). 48 ideas brainstorm → 5 top initiatives. +5 screens mới. |
 
 ---
 

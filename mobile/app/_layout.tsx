@@ -106,6 +106,37 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="contribute/index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="contribute/camera"
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+          }}
+        />
+        <Stack.Screen
+          name="contribute/confirm"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="contribute/success"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="contribute/leaderboard"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
     </>
   );
