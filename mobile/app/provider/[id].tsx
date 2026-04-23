@@ -20,6 +20,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProviderStore } from '@/stores/provider.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useFavoritesStore } from '@/stores/favorites.store';
+import { useRecentStore } from '@/stores/recent.store';
 import { getCategoryByKey } from '@/constants/categories';
 import { Spacing, FontSize, FontWeight, BorderRadius, Shadow } from '@/constants/theme';
 import { Provider } from '@/types/database';
@@ -42,6 +43,7 @@ export default function ProviderDetailScreen() {
   const { session } = useAuthStore();
   const { getProviderById } = useProviderStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const { addToRecent } = useRecentStore();
 
   const [provider, setProvider] = useState<Provider | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,41 @@ export default function ProviderDetailScreen() {
     setLoading(true);
     const data = await getProviderById(id);
     setProvider(data);
+    if (data) {
+      addToRecent(data);
+    }
     setLoading(false);
+  };
+
+  const handleViewReviews = () => {
+    if (!provider) return;
+    router.push({
+      pathname: '/provider/reviews',
+      params: { providerId: provider.id, providerName: encodeURIComponent(provider.name) },
+    });
+  };
+
+  const handleRate = () => {
+    if (!provider) return;
+    router.push({
+      pathname: '/provider/rate',
+      params: { providerId: provider.id, providerName: encodeURIComponent(provider.name) },
+    });
+  };
+
+  const handleViewGallery = (index: number = 0) => {
+    router.push({
+      pathname: '/provider/gallery',
+      params: { photos: JSON.stringify(photos), initialIndex: index.toString() },
+    });
+  };
+
+  const handleReport = () => {
+    if (!provider) return;
+    router.push({
+      pathname: '/provider/report',
+      params: { providerId: provider.id, providerName: encodeURIComponent(provider.name) },
+    });
   };
 
   const handleCall = () => {
@@ -168,12 +204,17 @@ export default function ProviderDetailScreen() {
             }}
           >
             {photos.map((photo, index) => (
-              <Image
+              <TouchableOpacity
                 key={index}
-                source={{ uri: photo }}
-                style={styles.image}
-                resizeMode="cover"
-              />
+                activeOpacity={0.95}
+                onPress={() => handleViewGallery(index)}
+              >
+                <Image
+                  source={{ uri: photo }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -226,7 +267,7 @@ export default function ProviderDetailScreen() {
             <Text style={[styles.name, { color: colors.text }]}>{provider.name}</Text>
 
             <View style={styles.ratingRow}>
-              <View style={styles.rating}>
+              <TouchableOpacity style={styles.rating} onPress={handleViewReviews}>
                 <Ionicons name="star" size={14} color={colors.primary} />
                 <Text style={[styles.ratingText, { color: colors.text }]}>
                   {provider.rating_avg?.toFixed(1) || 'Mới'}
@@ -236,7 +277,8 @@ export default function ProviderDetailScreen() {
                     ({provider.rating_count} đánh giá)
                   </Text>
                 )}
-              </View>
+                <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
+              </TouchableOpacity>
               {category && (
                 <View style={[styles.categoryPill, { backgroundColor: category.color + '15' }]}>
                   <Ionicons name={category.icon} size={14} color={category.color} />
@@ -361,6 +403,27 @@ export default function ProviderDetailScreen() {
               </View>
             </>
           )}
+
+          {/* Actions */}
+          <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
+          <View style={styles.actionsSection}>
+            {session && (
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: colors.surface }]}
+                onPress={handleRate}
+              >
+                <Ionicons name="star-outline" size={20} color={colors.primary} />
+                <Text style={[styles.actionText, { color: colors.text }]}>Viết đánh giá</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: colors.surface }]}
+              onPress={handleReport}
+            >
+              <Ionicons name="flag-outline" size={20} color={colors.textSecondary} />
+              <Text style={[styles.actionText, { color: colors.textSecondary }]}>Báo cáo</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Spacer for footer */}
           <View style={{ height: 100 }} />
@@ -610,6 +673,24 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   serviceText: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.medium,
+  },
+  actionsSection: {
+    paddingHorizontal: Spacing.lg,
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    gap: Spacing.sm,
+  },
+  actionText: {
     fontSize: FontSize.body,
     fontWeight: FontWeight.medium,
   },

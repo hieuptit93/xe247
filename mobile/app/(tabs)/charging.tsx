@@ -112,7 +112,7 @@ export default function ChargingScreen() {
   };
 
   const handleStationPress = (station: Provider) => {
-    router.push(`/provider/${station.id}`);
+    router.push(`/station/${station.id}`);
   };
 
   const handleMarkerPress = (station: Provider) => {

@@ -190,6 +190,20 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
 
+        {/* Activity Section - for all users */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Hoạt động
+          </Text>
+          <View style={[styles.menuGroup, { backgroundColor: colors.background }]}>
+            <MenuItem
+              icon="time-outline"
+              title="Đã xem gần đây"
+              onPress={() => router.push('/recent')}
+            />
+          </View>
+        </View>
+
         {/* Menu Sections - Only show for logged in users */}
         {!isGuest && session && (
           <View style={styles.section}>

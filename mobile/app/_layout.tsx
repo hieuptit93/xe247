@@ -61,6 +61,51 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="provider/reviews"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="provider/gallery"
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+          }}
+        />
+        <Stack.Screen
+          name="provider/rate"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="provider/rate-success"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="provider/report"
+          options={{
+            headerShown: false,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="station/[id]"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="recent"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
     </>
   );

@@ -153,10 +153,10 @@ mobile/
 
 #### F-C07: Rating & Review
 - [x] Hiển thị rating trong provider card
-- [ ] Viết đánh giá (chưa có flow)
-- [ ] Upload ảnh đánh giá
-- [ ] Xem danh sách đánh giá đầy đủ
-- [ ] Quick tags ("Đúng giờ", "Thái độ tốt"...)
+- [x] Viết đánh giá (stars + quick tags + comment)
+- [x] Xem danh sách đánh giá đầy đủ
+- [x] Quick tags ("Đúng giờ", "Thái độ tốt"...)
+- [ ] Upload ảnh đánh giá (future enhancement)
 
 #### Provider Mode Switching
 - [x] Role switcher UI
@@ -205,15 +205,24 @@ mobile/
 
 | Category | Done | Total | % |
 |----------|------|-------|---|
-| Consumer Screens (PRD) | 11 | 18 | 61% |
+| Consumer Screens (PRD) | 18 | 18 | 100% |
 | Provider Screens (PRD) | 2 | 12 | 17% |
 | Admin Screens (PRD) | 0 | 6 | 0% |
-| **Overall** | **13** | **36** | **36%** |
+| **Overall** | **20** | **36** | **56%** |
+
+**Consumer screens completed (2026-04-22):**
+- C05: Provider Gallery (fullscreen zoom, pinch-to-zoom)
+- C06: Provider Reviews (list, stats, distribution chart)
+- C08: EV Station Detail (ports, amenities, map)
+- C12: Rating Screen (stars, quick tags, comment)
+- C13: Rating Success (animated confirmation)
+- C16: Recently Viewed (with timestamp)
+- C18: Report Provider (6 report types)
 
 **Next priorities (theo PRD roadmap):**
-1. Hoàn thiện Rating flow (F-C07)
-2. Provider registration flow (F-P01)
-3. Service management (F-P02)
+1. Provider registration flow (F-P01)
+2. Service management (F-P02)
+3. Provider dashboard (F-P04)
 4. Basic booking flow (F-C04) - đơn giản hóa cho MVP
 
 ---
